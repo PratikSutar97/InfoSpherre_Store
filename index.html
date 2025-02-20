@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoSpherre Store</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            background: #ddd;
+            padding: 10px;
+        }
+        .tab {
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            background: #bbb;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .tab.active {
+            background: #ff6600;
+            color: white;
+        }
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .product {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 15px;
+            padding: 15px;
+            width: 250px;
+            text-align: center;
+        }
+        .image-container {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-radius: 10px;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+        .price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 10px 0;
+        }
+        .buy-button {
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .buy-button:hover {
+            background: #cc5500;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">InfoSpherre Store</div>
+    <div class="tabs" id="category-tabs">
+        <div class="tab active" onclick="filterProducts('all')">All</div>
+        <div class="tab" onclick="filterProducts('Mobile Phones')">Mobile Phones</div>
+        <div class="tab" onclick="filterProducts('Speakers')">Speakers</div>
+        <div class="tab" onclick="filterProducts('Headphones/Earphones')">Headphones/Earphones</div>
+        <div class="tab" onclick="filterProducts('Other Mobile Accessories')">Other Mobile Accessories</div>
+        <div class="tab" onclick="filterProducts('Laptops')">Laptops</div>
+        <div class="tab" onclick="filterProducts('TV')">TV</div>
+        <div class="tab" onclick="filterProducts('Home Decor Items')">Home Decor Items</div>
+        <div class="tab" onclick="filterProducts('Lightings')">Lightings</div>
+    </div>
+    <div class="products" id="product-list"></div>
+
+    <script>
+        async function loadProducts() {
+            try {
+                const response = await fetch("products.xlsx");
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: "array" });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                
+                window.products = rows.slice(1).map(row => {
+                    if (row.length < 5) return null;
+                    const [name, link, images, price, category] = row;
+                    return { name, link, images: images.split(','), price, category };
+                }).filter(Boolean);
+                
+                filterProducts('all');
+            } catch (error) {
+                console.error("Error loading Excel file:", error);
+            }
+        }
+        
+        function filterProducts(category) {
+            const productList = document.getElementById("product-list");
+            productList.innerHTML = "";
+            
+            document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+            document.querySelector(`.tab[onclick="filterProducts('${category}')"]`).classList.add("active");
+            
+            window.products.forEach(({ name, link, images, price, category: prodCategory }) => {
+                if (category !== 'all' && prodCategory !== category) return;
+                
+                let productDiv = document.createElement("div");
+                productDiv.className = "product";
+                
+                let imageContainer = document.createElement("div");
+                imageContainer.className = "image-container";
+                
+                images.forEach(url => {
+                    let img = document.createElement("img");
+                    img.src = url.trim();
+                    img.alt = name;
+                    imageContainer.appendChild(img);
+                });
+                
+                productDiv.innerHTML = `
+                    <h3>${name}</h3>
+                    <p class="price">Price: ${price}</p>
+                    <button class="buy-button" onclick="window.location.href='${link}'">Buy on Amazon</button>
+                `;
+                productDiv.prepend(imageContainer);
+                productList.appendChild(productDiv);
+            });
+        }
+        
+        document.addEventListener("DOMContentLoaded", loadProducts);
+    </script>
+</body>
+</html>
