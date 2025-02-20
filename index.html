@@ -21,15 +21,18 @@
             font-weight: bold;
             text-transform: uppercase;
         }
-        .tabs {
-            display: flex;
-            justify-content: center;
+        .tabs-container {
             background: #ddd;
             padding: 10px;
         }
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
         .tab {
             padding: 10px 20px;
-            margin: 0 5px;
+            margin: 5px;
             cursor: pointer;
             background: #bbb;
             border-radius: 5px;
@@ -38,6 +41,9 @@
         .tab.active {
             background: #ff6600;
             color: white;
+        }
+        .dropdown {
+            display: none;
         }
         .products {
             display: flex;
@@ -51,7 +57,8 @@
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
             margin: 15px;
             padding: 15px;
-            width: 250px;
+            width: 90%;
+            max-width: 300px;
             text-align: center;
         }
         .image-container {
@@ -86,20 +93,53 @@
         .buy-button:hover {
             background: #cc5500;
         }
+        @media (max-width: 768px) {
+            .tabs {
+                display: none;
+            }
+            .dropdown {
+                display: block;
+                width: 100%;
+                padding: 10px;
+                font-size: 16px;
+                text-align: center;
+            }
+            .product {
+                width: 100%;
+            }
+        }
+        @media (min-width: 769px) {
+            .dropdown {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">InfoSpherre Store</div>
-    <div class="tabs" id="category-tabs">
-        <div class="tab active" onclick="filterProducts('all')">All</div>
-        <div class="tab" onclick="filterProducts('Mobile Phones')">Mobile Phones</div>
-        <div class="tab" onclick="filterProducts('Speakers')">Speakers</div>
-        <div class="tab" onclick="filterProducts('Headphones/Earphones')">Headphones/Earphones</div>
-        <div class="tab" onclick="filterProducts('Other Mobile Accessories')">Other Mobile Accessories</div>
-        <div class="tab" onclick="filterProducts('Laptops')">Laptops</div>
-        <div class="tab" onclick="filterProducts('TV')">TV</div>
-        <div class="tab" onclick="filterProducts('Home Decor Items')">Home Decor Items</div>
-        <div class="tab" onclick="filterProducts('Lightings')">Lightings</div>
+    <div class="tabs-container">
+        <select class="dropdown" id="category-dropdown" onchange="filterProducts(this.value)">
+            <option value="all">All</option>
+            <option value="Mobile Phones">Mobile Phones</option>
+            <option value="Speakers">Speakers</option>
+            <option value="Headphones/Earphones">Headphones/Earphones</option>
+            <option value="Other Mobile Accessories">Other Mobile Accessories</option>
+            <option value="Laptops">Laptops</option>
+            <option value="TV">TV</option>
+            <option value="Home Decor Items">Home Decor Items</option>
+            <option value="Lightings">Lightings</option>
+        </select>
+        <div class="tabs" id="category-tabs">
+            <div class="tab active" onclick="filterProducts('all')">All</div>
+            <div class="tab" onclick="filterProducts('Mobile Phones')">Mobile Phones</div>
+            <div class="tab" onclick="filterProducts('Speakers')">Speakers</div>
+            <div class="tab" onclick="filterProducts('Headphones/Earphones')">Headphones/Earphones</div>
+            <div class="tab" onclick="filterProducts('Other Mobile Accessories')">Other Mobile Accessories</div>
+            <div class="tab" onclick="filterProducts('Laptops')">Laptops</div>
+            <div class="tab" onclick="filterProducts('TV')">TV</div>
+            <div class="tab" onclick="filterProducts('Home Decor Items')">Home Decor Items</div>
+            <div class="tab" onclick="filterProducts('Lightings')">Lightings</div>
+        </div>
     </div>
     <div class="products" id="product-list"></div>
 
@@ -129,7 +169,8 @@
             productList.innerHTML = "";
             
             document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-            document.querySelector(`.tab[onclick="filterProducts('${category}')"]`).classList.add("active");
+            let selectedTab = document.querySelector(`.tab[onclick="filterProducts('${category}')"]`);
+            if (selectedTab) selectedTab.classList.add("active");
             
             window.products.forEach(({ name, link, images, price, category: prodCategory }) => {
                 if (category !== 'all' && prodCategory !== category) return;
@@ -147,16 +188,11 @@
                     imageContainer.appendChild(img);
                 });
                 
-                productDiv.innerHTML = `
-                    <h3>${name}</h3>
-                    <p class="price">Price: ${price}</p>
-                    <button class="buy-button" onclick="window.location.href='${link}'">Buy on Amazon</button>
-                `;
+                productDiv.innerHTML = `<h3>${name}</h3><p class="price">Price: ${price}</p><button class="buy-button" onclick="window.location.href='${link}'">Buy on Amazon</button>`;
                 productDiv.prepend(imageContainer);
                 productList.appendChild(productDiv);
             });
         }
-        
         document.addEventListener("DOMContentLoaded", loadProducts);
     </script>
 </body>
