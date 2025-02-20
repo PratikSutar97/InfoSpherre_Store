@@ -26,7 +26,7 @@
       top: 0;
       z-index: 1000;
     }
-    /* Settings Button positioned relative to header */
+    /* Settings Button (Gear) in header – stays fixed in header */
     .settings-btn {
       position: absolute;
       top: 10px;
@@ -80,7 +80,6 @@
     }
     .tabs {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
     }
     .tab {
@@ -100,6 +99,31 @@
     }
     .products {
       padding: 20px;
+    }
+    /* Category container with header */
+    .category-container {
+      margin-bottom: 20px;
+    }
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+      margin-bottom: 5px;
+    }
+    .category-header h2 {
+      margin: 0;
+      font-size: 20px;
+      text-align: left;
+    }
+    .view-all-btn {
+      background: #ff6600;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
     }
     /* Product card styles */
     .product {
@@ -125,12 +149,13 @@
     /* Horizontal group layout for "All" category */
     .category-group {
       display: flex;
+      flex-wrap: nowrap; /* Keep products in one row */
       overflow-x: auto;
       padding: 10px;
-      margin-bottom: 20px;
       border-radius: 10px;
       background-color: #e0e0e0;
-      box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      position: relative;
     }
     .category-group .product {
       min-width: 200px;
@@ -329,24 +354,25 @@
         font-size: 12px;
       }
       .product {
-        width: 180px;
-        height: 280px;
+        width: 160px;
+        height: 260px;
         margin: 8px;
         padding: 6px;
       }
       .product h3 {
-        font-size: 11px;
+        font-size: 10px;
       }
       .price {
-        font-size: 14px;
+        font-size: 12px;
       }
       .buy-button {
-        font-size: 12px;
+        font-size: 10px;
         padding: 4px 8px;
       }
       .image-container {
-        height: 100px;
+        height: 80px;
       }
+      /* Collapse category tabs to dropdown on mobile */
       .tabs {
         display: none;
       }
@@ -356,6 +382,11 @@
         padding: 10px;
         font-size: 16px;
         text-align: center;
+      }
+      /* Force horizontal scrolling for category group */
+      .category-group {
+        flex-wrap: nowrap;
+        overflow-x: auto;
       }
     }
     @media (min-width: 769px) {
@@ -368,7 +399,7 @@
 <body>
   <div class="header">
     InfoSpherre Store
-    <!-- Settings Button (stays with header) -->
+    <!-- Settings Button (stays in header) -->
     <button class="settings-btn" onclick="toggleSettingsMenu()">
       <img src="https://cdn-icons-png.flaticon.com/512/126/126472.png" alt="Settings">
     </button>
@@ -497,7 +528,9 @@
     function renderProducts(items, category) {
       const productList = document.getElementById("product-list");
       productList.innerHTML = "";
+      
       if (category === "all") {
+        // Group products by category
         const groups = {};
         items.forEach(product => {
           if (!groups[product.category]) {
@@ -506,8 +539,14 @@
           groups[product.category].push(product);
         });
         for (let cat in groups) {
-          productList.innerHTML += `<h2>${cat}</h2>
-            <div class="category-group" style="background-color:#e0e0e0; border-radius:10px; box-shadow:0px 2px 4px rgba(0,0,0,0.2); padding:10px;">`;
+          productList.innerHTML += `
+            <div class="category-container">
+              <div class="category-header">
+                <h2>${cat}</h2>
+                <button class="view-all-btn" onclick="filterProducts('${cat}')">View All</button>
+              </div>
+              <div class="category-group" style="background-color:#e0e0e0; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2); padding:10px;">
+          `;
           groups[cat].forEach(product => {
             let imagesHTML = product.images.map(img => `<img src="${img.trim()}" alt="${product.name}" onclick="zoomImage(event)">`).join("");
             productList.innerHTML += `
@@ -518,10 +557,10 @@
                 <button class="buy-button" onclick="window.open('${product.link}', '_blank')">Buy on Amazon</button>
               </div>`;
           });
-          productList.innerHTML += `</div>`;
+          productList.innerHTML += `</div></div>`;
         }
       } else {
-        productList.innerHTML += `<div class="category-group" style="background-color:#e0e0e0; border-radius:10px; box-shadow:0px 2px 4px rgba(0,0,0,0.2); padding:10px;">`;
+        productList.innerHTML += `<div class="category-group" style="background-color:#e0e0e0; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2); padding:10px;">`;
         items.forEach(product => {
           let imagesHTML = product.images.map(img => `<img src="${img.trim()}" alt="${product.name}" onclick="zoomImage(event)">`).join("");
           productList.innerHTML += `
